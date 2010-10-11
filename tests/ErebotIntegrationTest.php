@@ -16,6 +16,7 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+# @TODO: this is completely wrong now!!
 include_once(dirname(dirname(dirname(dirname(__FILE__)))).'/src/utils.php');
 ErebotUtils::incl('../../../tests/connectionStub.php');
 ErebotUtils::incl('../../../tests/configStub.php');

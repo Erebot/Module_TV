@@ -165,7 +165,7 @@ Returns TV schedules for the given channels at the given time.
         else
             $target = $chan = $event->getChan();
 
-        $time       = ErebotUtils::gettok($event->getText(), 1, 1);
+        $time       = $event->getText()->getTokens(1, 1);
         $getdate    = getdate();
         $tomorrow   = getdate(strtotime('midnight +1 day'));
         $translator = $this->getTranslator($chan);
@@ -199,8 +199,7 @@ Returns TV schedules for the given channels at the given time.
 
         $timestamp  = mktime($hours, $minutes, 0, $getdate['mon'],
                             $getdate['mday'], $getdate['year']);
-        $channels   = strtolower(ErebotUtils::gettok(
-                        $event->getText(), $result ? 2 : 1));
+        $channels   = strtolower($event->getText()->getTokens($result ? 2 : 1));
 
         if (rtrim($channels) == '') {
             if ($this->_defaultGroup)

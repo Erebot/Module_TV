@@ -16,10 +16,20 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# @TODO: this is completely wrong now!!
-include_once(dirname(dirname(dirname(dirname(__FILE__)))).'/src/utils.php');
-ErebotUtils::incl('../../../tests/connectionStub.php');
-ErebotUtils::incl('../../../tests/configStub.php');
+if (!defined('__DIR__')) {
+  class __FILE_CLASS__ {
+    function  __toString() {
+      $X = debug_backtrace();
+      return dirname($X[1]['file']);
+    }
+  }
+  define('__DIR__', new __FILE_CLASS__);
+} 
+
+include_once(__DIR__.'/testenv/connectionStub.php');
+include_once(__DIR__.'/testenv/configStub.php');
+
+include_once(__DIR__.'/../TV.php');
 
 class TestTvRetriever
 {
@@ -69,32 +79,56 @@ class TestTvRetriever
     }
 }
 
+interface iErebotEventMessageText
+{
+}
+
+interface iErebotEventTextPrivate
+{
+}
+
+interface iErebotEventPrivate
+{
+}
+
+class PrivateMessage
+implements  iErebotEventMessageText,
+            iErebotEventTextPrivate,
+            iErebotEventPrivate
+{
+    public function __construct($text)
+    {
+        $this->text = $text;
+    }
+
+    public function getSource()
+    {
+        return 'test';
+    }
+}
+
+class FakeConnection
+{
+    
+}
+
 class   ErebotIntegrationTest
 extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $xml        = new SimpleXMLElement('<stub/>');
-        $mainCfg    = new ErebotStubbedMainConfig(NULL, NULL);
-        $this->bot  = new ErebotStubbedCore($mainCfg);
+        $this->module = new ErebotModule_TV();
+        $this->modules->connection = new FakeConnection();
+        $this->module->reload(
+            $this->module->RELOAD_MEMBERS |
+            $this->module->RELOAD_INIT
+        );
     }
 
     public function testMissingDefaultGroup()
     {
-        $config = ErebotStubbedServerConfig::create(array(
-                    'TV' => '
-<module xmlns="http://www.erebot.net/xmlns/erebot" name="TV">
-    <param name="trigger" value="tv-schedule"/>
-    <param name="retriever_class" value="TestTvRetriever"/>
-</module>
-',
-                    'TriggerRegistry' => NULL,
-                    'Helper' => NULL));
-        $connection = new ErebotStubbedConnection($this->bot, $config);
-        $module = $connection->getModule('TV', ErebotConnection::MODULE_BY_NAME);
-
-        $event = new ErebotEventTextPrivate($connection, 'test', '!tv-schedule');
-        $module->handleTv($event);
+        $event = new PrivateMessage();
+        $this->module->handleTv($event);
         $output = $connection->getSendQueue();
         $this->assertEquals(1, count($output));
         $this->assertEquals(
@@ -105,35 +139,15 @@ extends PHPUnit_Framework_TestCase
 
     public function testUsingDefaultGroupWithChannelOverride()
     {
-        $config = ErebotStubbedServerConfig::create(array(
-                    'TV' => '
-<module xmlns="http://www.erebot.net/xmlns/erebot" name="TV">
-    <param name="default_group" value="foo"/>
-    <param name="group_foo" value="foo,bar"/>
-    <param name="retriever_class" value="TestTvRetriever"/>
-</module>
-',
-                    'TriggerRegistry' => NULL,
-                    'Helper' => NULL));
-        $connection = new ErebotStubbedConnection($this->bot, $config);
-        $module = $connection->getModule('TV', ErebotConnection::MODULE_BY_NAME);
-
-        $event = new ErebotEventTextPrivate($connection, 'test', '!tv 23h42 foo');
-        $module->handleTv($event);
+        $event = new PrivateMessage('!tv 23h42 foo');
+        $this->module->handleTv($event);
         $output = $connection->getSendQueue();
-        $translator = new ErebotStubbedI18n();
 
-        $fmt = new ErebotStyling('/PRIVMSG test :TV programs for <u><var name="date"/>'.
-                        '</u>: <for from="programs" key="channel" item="'.
-                        'timetable" separator=" - "><b><var name="channel"'.
-                        '/></b>: <var name="timetable"/></for>/', $translator);
-        $fmt->assign('date', '.*?');
-        $fmt->assign('programs', array(
-            'foo' => 'foo \\(17:23 - 17:42\\)',
-            'bar' => 'bar \\(17:23 - 17:42\\)',
-        ));
+        $pattern =  "/PRIVMSG test :TV programs for \037.*?\037: ".
+                    "\002foo\002: foo \\(17:23 - 17:42\\) - ".
+                    "\002bar\002: bar \\(17:23 - 17:42\\)";
         $this->assertEquals(1, count($output));
-        $this->assertRegExp($fmt->render(), $output[0]);
+        $this->assertRegExp($pattern, $output[0]);
     }
 }
 

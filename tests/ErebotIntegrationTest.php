@@ -26,24 +26,18 @@ if (!defined('__DIR__')) {
   define('__DIR__', new __FILE_CLASS__);
 } 
 
-include_once(__DIR__.'/testenv/connectionStub.php');
-include_once(__DIR__.'/testenv/configStub.php');
-
+include_once(__DIR__.'/testenv/bootstrap.php');
 include_once(__DIR__.'/../TV.php');
 
 class TestTvRetriever
 {
     protected $ID_mappings = array('foo' => 42, 'bar' => 69);
-    static protected $instance;
 
     public static function getInstance()
     {
-        if (self::$instance === NULL) {
-            $c = __CLASS__;
-            self::$instance = new $c();
-        }
-
-        return self::$instance;
+        $c = __CLASS__;
+        $instance = new $c();
+        return $instance;
     }
 
     public function getSupportedChannels()
@@ -79,75 +73,57 @@ class TestTvRetriever
     }
 }
 
-interface iErebotEventMessageText
+class ErebotTestModule_Tv
+extends ErebotModule_Tv
 {
-}
-
-interface iErebotEventTextPrivate
-{
-}
-
-interface iErebotEventPrivate
-{
-}
-
-class PrivateMessage
-implements  iErebotEventMessageText,
-            iErebotEventTextPrivate,
-            iErebotEventPrivate
-{
-    public function __construct($text)
+    public function setTvRetriever($tv)
     {
-        $this->text = $text;
+        $this->_tv = $tv;
     }
 
-    public function getSource()
+    public function setCustomMappings($mappings)
     {
-        return 'test';
+        $this->_customMappings = $mappings;
     }
-}
 
-class FakeConnection
-{
-    
+    public function setDefaultGroup($group)
+    {
+        $this->_defaultGroup = $group;
+    }
 }
 
 class   ErebotIntegrationTest
-extends PHPUnit_Framework_TestCase
+extends ErebotModuleTestCase
 {
     public function setUp()
     {
-        $this->module = new ErebotModule_TV();
-        $this->modules->connection = new FakeConnection();
-        $this->module->reload(
-            $this->module->RELOAD_MEMBERS |
-            $this->module->RELOAD_INIT
-        );
+        parent::setUp();
+        $this->_module = new ErebotTestModule_Tv($this->_connection, '');
+        $this->_module->setTvRetriever(new TestTvRetriever());
     }
 
     public function testMissingDefaultGroup()
     {
-        $event = new PrivateMessage();
-        $this->module->handleTv($event);
-        $output = $connection->getSendQueue();
-        $this->assertEquals(1, count($output));
+        $event = new ErebotEventTextPrivate($this->_connection, 'test', '!tv');
+        $this->_module->handleTv($event);
+
+        $this->assertEquals(1, count($this->_outputBuffer));
         $this->assertEquals(
             "PRIVMSG test :No channel given and no default.",
-            $output[0]
+            $this->_outputBuffer[0]
         );
     }
 
     public function testUsingDefaultGroupWithChannelOverride()
     {
-        $event = new PrivateMessage('!tv 23h42 foo');
-        $this->module->handleTv($event);
-        $output = $connection->getSendQueue();
+        $event = new ErebotEventTextPrivate($this->_connection, 'test', '!tv 23h42 foo');
+        $this->_module->handleTv($event);
 
         $pattern =  "/PRIVMSG test :TV programs for \037.*?\037: ".
                     "\002foo\002: foo \\(17:23 - 17:42\\) - ".
-                    "\002bar\002: bar \\(17:23 - 17:42\\)";
-        $this->assertEquals(1, count($output));
-        $this->assertRegExp($pattern, $output[0]);
+                    "\002bar\002: bar \\(17:23 - 17:42\\)/";
+        $this->assertEquals(1, count($this->_outputBuffer));
+        $this->assertRegExp($pattern, $this->_outputBuffer[0]);
     }
 }
 

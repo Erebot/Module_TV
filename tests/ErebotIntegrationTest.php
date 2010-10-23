@@ -98,8 +98,13 @@ extends ErebotModuleTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->_module = new ErebotTestModule_Tv($this->_connection, '');
+        $this->_module = new ErebotTestModule_Tv($this->_connection, NULL);
         $this->_module->setTvRetriever(new TestTvRetriever());
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
     }
 
     public function testMissingDefaultGroup()

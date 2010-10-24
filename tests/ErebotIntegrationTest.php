@@ -26,6 +26,7 @@ if (!defined('__DIR__')) {
   define('__DIR__', new __FILE_CLASS__);
 } 
 
+set_include_path(__DIR__.'/Core'.PATH_SEPARATOR.get_include_path());
 include_once(__DIR__.'/testenv/bootstrap.php');
 include_once(__DIR__.'/../TV.php');
 

@@ -66,7 +66,7 @@ extends ErebotModuleBase
                 if (!isset($this->_customMappings[$this->_defaultGroup]))
                     $this->_defaultGroup = NULL;
             }
-            catch (EErebotNotFound $e) {
+            catch (Erebot_NotFoundException $e) {
                 $this->_defaultGroup = NULL;
             }
         }

@@ -16,23 +16,14 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-if (!defined('__DIR__')) {
-  class __FILE_CLASS__ {
-    function  __toString() {
-      $X = debug_backtrace();
-      return dirname($X[1]['file']);
-    }
-  }
-  define('__DIR__', new __FILE_CLASS__);
-} 
-
-include_once(__DIR__.'/src/TvRetriever.php');
-
-class   ErebotModule_Tv
-extends ErebotModuleBase
+class   Erebot_Module_TV
+extends Erebot_Module_Base
 {
     static protected $_metadata = array(
-        'requires'  =>  array('TriggerRegistry', 'Helper'),
+        'requires'  =>  array(
+            'Erebot_Module_TriggerRegistry',
+            'Erebot_Module_Helper'
+        ),
     );
     protected $_tv;
     protected $_customMappings = array();
@@ -44,8 +35,13 @@ extends ErebotModuleBase
     public function reload($flags)
     {
         if ($flags & self::RELOAD_MEMBERS) {
-            $class = $this->parseString('retriever_class', 'TvRetriever');
-            $this->_tv = $class::getInstance();
+            $class = $this->parseString('fetcher_class', 'Erebot_Module_TV_Fetcher');
+            /// @TODO: add extra checks (return codes, exceptions, ...)
+            // We avoid using "::" on getInstance()
+            // to keep 5.2.x compatibility.
+            $reflector = new ReflectionClass($class);
+            $getter = $reflector->getMethod('getInstance');
+            $this->_tv = $getter->invoke(NULL);
 
             $config         =&  $this->_connection->getConfig($this->_channel);
             $moduleConfig   =&  $config->getModule($this->_moduleName);
@@ -72,9 +68,11 @@ extends ErebotModuleBase
         }
 
         if ($flags & self::RELOAD_HANDLERS) {
-            $registry   = $this->_connection->getModule('TriggerRegistry',
-                                ErebotConnection::MODULE_BY_NAME);
-            $matchAny = ErebotUtils::getVStatic($registry, 'MATCH_ANY');
+            $registry   = $this->_connection->getModule(
+                'Erebot_Module_TriggerRegistry',
+                Erebot_Connection::MODULE_BY_NAME
+            );
+            $matchAny = Erebot_Utils::getVStatic($registry, 'MATCH_ANY');
 
             if (!($flags & self::RELOAD_INIT)) {
                 $this->_connection->removeEventHandler($this->_handler);
@@ -88,22 +86,22 @@ extends ErebotModuleBase
                 throw new Exception($this->_translator->gettext(
                     'Could not register TV trigger'));
 
-            $filter         = new ErebotTextFilter($this->_mainCfg);
-            $filter->addPattern(ErebotTextFilter::TYPE_STATIC, $trigger, TRUE);
-            $filter->addPattern(ErebotTextFilter::TYPE_WILDCARD,
+            $filter         = new Erebot_TextFilter($this->_mainCfg);
+            $filter->addPattern(Erebot_TextFilter::TYPE_STATIC, $trigger, TRUE);
+            $filter->addPattern(Erebot_TextFilter::TYPE_WILDCARD,
                                 $trigger.' *', TRUE);
 
-            $this->_handler = new ErebotEventHandler(
+            $this->_handler = new Erebot_EventHandler(
                                     array($this, 'handleTv'),
-                                    'iErebotEventMessageText',
+                                    'Erebot_Interface_Event_TextMessage',
                                     NULL, $filter);
             $this->_connection->addEventHandler($this->_handler);
         }
     }
 
-    public function getHelp(iErebotEventMessageText &$event, $words)
+    public function getHelp(Erebot_Interface_Event_TextMessage &$event, $words)
     {
-        if ($event instanceof iErebotEventPrivate) {
+        if ($event instanceof Erebot_Interface_Event_Private) {
             $target = $event->getSource();
             $chan   = NULL;
         }
@@ -122,7 +120,7 @@ extends ErebotModuleBase
 Provides the <b><var name="trigger"/></b> command which retrieves
 information about TV schedules off the internet.
 ');
-            $formatter = new ErebotStyling($msg, $translator);
+            $formatter = new Erebot_Styling($msg, $translator);
             $formatter->assign('trigger', $trigger);
             $this->sendMessage($target, $formatter->render());
             return TRUE;
@@ -139,7 +137,7 @@ Returns TV schedules for the given channels at the given time.
 [<u>channels</u>] can be a single channel name, a list of channels
 (separated by commas) or one of the pre-defined groups of channels.
 ");
-            $formatter = new ErebotStyling($msg, $translator);
+            $formatter = new Erebot_Styling($msg, $translator);
             $formatter->assign('trigger', $trigger);
             $this->sendMessage($target, $formatter->render());
 
@@ -147,7 +145,7 @@ Returns TV schedules for the given channels at the given time.
                     "(<b><var name='default'/></b>) is used. The following ".
                     "groups are available: <for from='groups' key='group' ".
                     "item='dummy'><b><var name='group'/></b></for>.");
-            $formatter = new ErebotStyling($msg, $translator);
+            $formatter = new Erebot_Styling($msg, $translator);
             $formatter->assign('default', $this->_defaultGroup);
             $formatter->assign('groups', $this->_customMappings);
             $this->sendMessage($target, $formatter->render());
@@ -156,9 +154,9 @@ Returns TV schedules for the given channels at the given time.
         }
     }
 
-    public function handleTv(iErebotEventMessageText &$event)
+    public function handleTv(Erebot_Interface_Event_TextMessage &$event)
     {
-        if ($event instanceof iErebotEventPrivate) {
+        if ($event instanceof Erebot_Interface_Event_Private) {
             $target = $event->getSource();
             $chan   = NULL;
         }
@@ -237,7 +235,7 @@ Returns TV schedules for the given channels at the given time.
                         'timetable" separator=" - "><b><var name="channel"'.
                         '/></b>: <var name="timetable"/></for>');
 
-            $formatter = new ErebotStyling($msg, $translator);
+            $formatter = new Erebot_Styling($msg, $translator);
             $formatter->assign('date',      date('r', $timestamp));
             $formatter->assign('programs',  $programs);
             $this->sendMessage($target, $formatter->render());

@@ -16,7 +16,7 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class TvRetriever
+class Erebot_Module_TV_Fetcher
 {
     const TARGET_URL    = 'http://television.telerama.fr/tele/grille.php';
 
@@ -125,9 +125,9 @@ class TvRetriever
             break;
         }
 
-        $internal   = libxml_use_internal_errors(TRUE);
+        $internal = libxml_use_internal_errors(TRUE);
 
-        $domdoc     = new DOMDocument();
+        $domdoc = new DOMDocument();
         $domdoc->validateOnParse        = FALSE;
         $domdoc->preserveWhitespace     = FALSE;
         $domdoc->strictErrorChecking    = FALSE;

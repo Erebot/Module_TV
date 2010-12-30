@@ -85,15 +85,13 @@ extends Erebot_Module_Base
                 throw new Exception($this->_translator->gettext(
                     'Could not register TV trigger'));
 
-            $filter         = new Erebot_TextFilter($this->_mainCfg);
-            $filter->addPattern(Erebot_TextFilter::TYPE_STATIC, $trigger, TRUE);
-            $filter->addPattern(Erebot_TextFilter::TYPE_WILDCARD,
-                                $trigger.' *', TRUE);
-
             $this->_handler = new Erebot_EventHandler(
-                                    array($this, 'handleTv'),
-                                    'Erebot_Interface_Event_TextMessage',
-                                    NULL, $filter);
+                array($this, 'handleTv'),
+                'Erebot_Interface_Event_TextMessage'
+            );
+            $this->_handler
+                ->addFilter(new Erebot_TextFilter_Static($trigger, TRUE))
+                ->addFilter(new Erebot_TextFilter_Wildcard($trigger.' *', TRUE));
             $this->_connection->addEventHandler($this->_handler);
         }
     }

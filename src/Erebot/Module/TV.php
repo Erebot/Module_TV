@@ -44,7 +44,7 @@ extends Erebot_Module_Base
             $this->_tv = $getter->invoke(NULL);
 
             $config         =&  $this->_connection->getConfig($this->_channel);
-            $moduleConfig   =&  $config->getModule($this->_moduleName);
+            $moduleConfig   =&  $config->getModule(get_class($this));
             $group_filter = create_function('$a',
                 'return !strncasecmp($a, "group_", 6);');
             $groups = array_filter($moduleConfig->getParamsNames());

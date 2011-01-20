@@ -43,8 +43,8 @@ extends Erebot_Module_Base
             $getter = $reflector->getMethod('getInstance');
             $this->_tv = $getter->invoke(NULL);
 
-            $config         =&  $this->_connection->getConfig($this->_channel);
-            $moduleConfig   =&  $config->getModule(get_class($this));
+            $config         = $this->_connection->getConfig($this->_channel);
+            $moduleConfig   = $config->getModule(get_class($this));
             $group_filter = create_function('$a',
                 'return !strncasecmp($a, "group_", 6);');
             $groups = array_filter($moduleConfig->getParamsNames());
@@ -99,7 +99,7 @@ extends Erebot_Module_Base
         }
     }
 
-    public function getHelp(Erebot_Interface_Event_TextMessage &$event, $words)
+    public function getHelp(Erebot_Interface_Event_TextMessage $event, $words)
     {
         if ($event instanceof Erebot_Interface_Event_Private) {
             $target = $event->getSource();
@@ -111,9 +111,9 @@ extends Erebot_Module_Base
         $translator = $this->getTranslator($chan);
         $trigger    = $this->parseString('trigger', 'tv');
 
-        $bot        =&  $this->_connection->getBot();
-        $moduleName =   strtolower(get_class());
-        $nbArgs     =   count($words);
+        $bot        = $this->_connection->getBot();
+        $moduleName = strtolower(get_class());
+        $nbArgs     = count($words);
 
         if ($nbArgs == 1 && $words[0] == $moduleName) {
             $msg = $translator->gettext('
@@ -154,7 +154,7 @@ Returns TV schedules for the given channels at the given time.
         }
     }
 
-    public function handleTv(Erebot_Interface_Event_TextMessage &$event)
+    public function handleTv(Erebot_Interface_Event_TextMessage $event)
     {
         if ($event instanceof Erebot_Interface_Event_Private) {
             $target = $event->getSource();

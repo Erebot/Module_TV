@@ -32,7 +32,7 @@ extends Erebot_Module_Base
     const TIME_12H_FORMAT = '/^(0?[0-9]|1[0-2])[:h\.]?([0-5][0-9])?([ap]m)$/i';
     const TIME_24H_FORMAT = '/^([0-1]?[0-9]|2[0-3])[:h\.]?([0-5][0-9])?$/i';
 
-    public function reload($flags)
+    public function _reload($flags)
     {
         if ($flags & self::RELOAD_MEMBERS) {
             $class = $this->parseString('fetcher_class', 'Erebot_Module_TV_Fetcher');
@@ -97,6 +97,10 @@ extends Erebot_Module_Base
             );
             $this->_connection->addEventHandler($this->_handler);
         }
+    }
+
+    protected function _unload()
+    {
     }
 
     public function getHelp(Erebot_Interface_Event_TextMessage $event, $words)

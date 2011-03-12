@@ -91,7 +91,11 @@ extends ErebotModuleTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->_module = new ErebotTestModule_Tv($this->_connection, NULL);
+        $this->_module = new ErebotTestModule_Tv(NULL);
+        $this->_module->reload(
+            $this->_connection,
+            Erebot_Module_Base::RELOAD_MEMBERS
+        );
         $this->_module->setTvRetriever(new TestTvRetriever());
     }
 

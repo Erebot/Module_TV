@@ -94,13 +94,14 @@ extends ErebotModuleTestCase
         $this->_module = new ErebotTestModule_Tv(NULL);
         $this->_module->reload(
             $this->_connection,
-            Erebot_Module_Base::RELOAD_MEMBERS
+            0
         );
         $this->_module->setTvRetriever(new TestTvRetriever());
     }
 
     public function tearDown()
     {
+        $this->_module->unload();
         parent::tearDown();
     }
 

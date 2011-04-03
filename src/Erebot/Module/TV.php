@@ -88,7 +88,7 @@ extends Erebot_Module_Base
             $this->_handler = new Erebot_EventHandler(
                 array($this, 'handleTv'),
                 new Erebot_Event_Match_All(
-                    new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_TextMessage'),
+                    new Erebot_Event_Match_InstanceOf('Erebot_Interface_Event_Base_TextMessage'),
                     new Erebot_Event_Match_Any(
                         new Erebot_Event_Match_TextStatic($trigger, TRUE),
                         new Erebot_Event_Match_TextWildcard($trigger.' *', TRUE)
@@ -158,9 +158,9 @@ Returns TV schedules for the given channels at the given time.
         }
     }
 
-    public function handleTv(Erebot_Interface_Event_TextMessage $event)
+    public function handleTv(Erebot_Interface_Event_Base_TextMessage $event)
     {
-        if ($event instanceof Erebot_Interface_Event_Private) {
+        if ($event instanceof Erebot_Interface_Event_Base_Private) {
             $target = $event->getSource();
             $chan   = NULL;
         }

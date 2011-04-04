@@ -103,9 +103,9 @@ extends Erebot_Module_Base
     {
     }
 
-    public function getHelp(Erebot_Interface_Event_TextMessage $event, $words)
+    public function getHelp(Erebot_Interface_Event_Base_TextMessage $event, $words)
     {
-        if ($event instanceof Erebot_Interface_Event_Private) {
+        if ($event instanceof Erebot_Interface_Event_Base_Private) {
             $target = $event->getSource();
             $chan   = NULL;
         }

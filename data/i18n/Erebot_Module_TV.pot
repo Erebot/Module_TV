@@ -4,9 +4,9 @@
 #
 #, fuzzy
 msgid   ""
-msgstr  "Project-Id-Version: Erebot_Module_TV 0.3.2\n"
-        "Report-Msgid-Bugs-To: clicky@erebot.net\n"
-        "POT-Creation-Date: 2011-06-03 22:25+0200\n"
+msgstr  "Project-Id-Version: Erebot_Module_TV 0.1.0\n"
+        "Report-Msgid-Bugs-To: i18n@erebot.net\n"
+        "POT-Creation-Date: 2011-06-07 01:07+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,7 +14,7 @@ msgstr  "Project-Id-Version: Erebot_Module_TV 0.3.2\n"
         "Content-Type: text/plain; charset=CHARSET\n"
         "Content-Transfer-Encoding: 8bit\n"
 #
-# File: /home/looksup/Documents/Erebot/modules/TV/trunk/src/Erebot/Module/TV.php, line: 137
+# File: src/Erebot/Module/TV.php, line: 137
 msgid   "\n"
         "<b>Usage:</b> !<var name='trigger'/> [<u>time</u>] [<u>channels</"
         "u>].\n"
@@ -24,31 +24,31 @@ msgid   "\n"
         "(separated by commas) or one of the pre-defined groups of channels.\n"
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/TV/trunk/src/Erebot/Module/TV.php, line: 123
+# File: src/Erebot/Module/TV.php, line: 123
 msgid   "\n"
         "Provides the <b><var name=\"trigger\"/></b> command which retrieves\n"
         "information about TV schedules off the internet.\n"
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/TV/trunk/src/Erebot/Module/TV.php, line: 86
+# File: src/Erebot/Module/TV.php, line: 86
 msgid   "Could not register TV trigger"
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/TV/trunk/src/Erebot/Module/TV.php, line: 148
+# File: src/Erebot/Module/TV.php, line: 148
 msgid   "If none is given, the default group (<b><var name='default'/></b>) is "
         "used. The following groups are available: <for from='groups' "
         "key='group' item='dummy'><b><var name='group'/></b></for>."
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/TV/trunk/src/Erebot/Module/TV.php, line: 210
+# File: src/Erebot/Module/TV.php, line: 210
 msgid   "No channel given and no default."
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/TV/trunk/src/Erebot/Module/TV.php, line: 235
+# File: src/Erebot/Module/TV.php, line: 235
 msgid   "No such channel(s)"
 msgstr  ""
 #
-# File: /home/looksup/Documents/Erebot/modules/TV/trunk/src/Erebot/Module/TV.php, line: 237
+# File: src/Erebot/Module/TV.php, line: 237
 msgid   "TV programs for <u><var name=\"date\"/></u>: <for from=\"programs\" "
         "key=\"channel\" item=\"timetable\" separator=\" - \"><b><var name="
         "\"channel\"/></b>: <var name=\"timetable\"/></for>"

@@ -19,12 +19,6 @@
 class   Erebot_Module_TV
 extends Erebot_Module_Base
 {
-    static protected $_metadata = array(
-        'requires'  =>  array(
-            'Erebot_Module_TriggerRegistry',
-            'Erebot_Module_Helper'
-        ),
-    );
     protected $_tv;
     protected $_customMappings = array();
     protected $_defaultGroup = NULL;
@@ -39,15 +33,15 @@ extends Erebot_Module_Base
             /// @TODO: add extra checks (return codes, exceptions, ...)
             // We avoid using "::" on getInstance()
             // to keep 5.2.x compatibility.
-            $reflector = new ReflectionClass($class);
-            $getter = $reflector->getMethod('getInstance');
-            $this->_tv = $getter->invoke(NULL);
+            $reflector  = new ReflectionClass($class);
+            $getter     = $reflector->getMethod('getInstance');
+            $this->_tv  = $getter->invoke(NULL);
 
             $config         = $this->_connection->getConfig($this->_channel);
             $moduleConfig   = $config->getModule(get_class($this));
-            $group_filter = create_function('$a',
+            $groupFilter    = create_function('$a',
                 'return !strncasecmp($a, "group_", 6);');
-            $groups = array_filter($moduleConfig->getParamsNames());
+            $groups = array_filter($moduleConfig->getParamsNames(), $groupFilter);
             $this->_customMappings = array();
 
             foreach ($groups as $param) {

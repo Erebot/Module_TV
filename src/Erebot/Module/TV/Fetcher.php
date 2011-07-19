@@ -166,4 +166,3 @@ class Erebot_Module_TV_Fetcher
     }
 }
 
-?>

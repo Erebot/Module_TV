@@ -154,7 +154,10 @@ Returns TV schedules for the given channels at the given time.
         }
     }
 
-    public function handleTV(Erebot_Interface_Event_Base_TextMessage $event)
+    public function handleTV(
+        Erebot_Interface_EventHandler           $handler,
+        Erebot_Interface_Event_Base_TextMessage $event
+    )
     {
         if ($event instanceof Erebot_Interface_Event_Base_Private) {
             $target = $event->getSource();

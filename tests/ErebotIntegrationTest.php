@@ -111,7 +111,7 @@ extends ErebotModuleTestCase
             $this->_connection, 'test',
             '!tv'
         );
-        $this->_module->handleTv($event);
+        $this->_module->handleTv($this->_eventHandler, $event);
 
         $this->assertEquals(1, count($this->_outputBuffer));
         $this->assertEquals(
@@ -126,7 +126,7 @@ extends ErebotModuleTestCase
             $this->_connection, 'test',
             '!tv 23h42 foo'
         );
-        $this->_module->handleTv($event);
+        $this->_module->handleTv($this->_eventHandler, $event);
 
         $pattern =  "/PRIVMSG test :TV programs for \037.*?\037: ".
                     "\002foo\002: foo \\(17:23 - 17:42\\) - ".

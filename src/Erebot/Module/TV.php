@@ -75,9 +75,11 @@ extends Erebot_Module_Base
             $this->registerHelpMethod(array($this, 'getHelp'));
             $trigger        = $this->parseString('trigger', 'tv');
             $this->_trigger = $registry->registerTriggers($trigger, $matchAny);
-            if ($this->_trigger === NULL)
-                throw new Exception($this->_translator->gettext(
+            if ($this->_trigger === NULL) {
+                $translator = $this->getTranslator(FALSE);
+                throw new Exception($translator->gettext(
                     'Could not register TV trigger'));
+            }
 
             $this->_handler = new Erebot_EventHandler(
                 new Erebot_Callable(array($this, 'handleTV')),

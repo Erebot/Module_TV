@@ -21,5 +21,7 @@ $compatible->dependencies['required']->package['pear2.php.net/PEAR2_HTTP_Request
 */
 
 $package->dependencies['required']->package['pear.erebot.net/Erebot_Module_TriggerRegistry']->save();
+$package->dependencies['required']->package['pear.php.net/HTTP_Request2-2.0.0RC1']->save();
 $compatible->dependencies['required']->package['pear.erebot.net/Erebot_Module_TriggerRegistry']->save();
+$compatible->dependencies['required']->package['pear.php.net/HTTP_Request2-2.0.0RC1']->save();
 

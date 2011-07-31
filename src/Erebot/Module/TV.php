@@ -33,9 +33,10 @@ extends Erebot_Module_Base
             /// @TODO: add extra checks (return codes, exceptions, ...)
             // We avoid using "::" on getInstance()
             // to keep 5.2.x compatibility.
-            $reflector  = new ReflectionClass($class);
-            $getter     = $reflector->getMethod('getInstance');
-            $this->_tv  = $getter->invoke(NULL);
+            $this->_tv  = new $class(
+                $this->parseInt('timeout', 8),
+                $this->parseInt('conn_timeout', 3)
+            );
 
             $config         = $this->_connection->getConfig($this->_channel);
             $moduleConfig   = $config->getModule(get_class($this));
@@ -221,7 +222,19 @@ Returns TV schedules for the given channels at the given time.
             array_map(
             array($this->_tv, 'getIdFromChannel'),
             $channels));
-        $infos  = $this->_tv->getChannelsData($timestamp, $ids);
+
+        try {
+            $infos  = $this->_tv->getChannelsData($timestamp, $ids);
+        }
+        catch (HTTP_Request2_Exception $e) {
+            $msg = $this->gettext(
+                'An error occurred while retrieving '.
+                'the information (<var name="error"/>)'
+            );
+            $tpl = new Erebot_Styling($msg, $translator);
+            $tpl->assign('error', $e->getMessage());
+            return $this->sendMessage($target, $tpl->render());
+        }
 
         $programs = array();
         foreach ($infos as $channel => $data) {

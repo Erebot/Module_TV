@@ -22,6 +22,7 @@ extends Erebot_Module_Base
     protected $_tv;
     protected $_customMappings = array();
     protected $_defaultGroup = NULL;
+    protected $_dateParser = 'strtotime';
 
     const TIME_12H_FORMAT = '/^(0?[0-9]|1[0-2])[:h\.]?([0-5][0-9])?([ap]m)$/i';
     const TIME_24H_FORMAT = '/^([0-1]?[0-9]|2[0-3])[:h\.]?([0-5][0-9])?$/i';
@@ -170,9 +171,10 @@ Returns TV schedules for the given channels at the given time.
             $target = $chan = $event->getChan();
 
         $time       = $event->getText()->getTokens(1, 1);
-        $getdate    = getdate();
-        $tomorrow   = getdate(strtotime('midnight +1 day'));
+        $getdate    = getdate(call_user_func($this->_dateParser, 'now'));
+        $tomorrow   = getdate(call_user_func($this->_dateParser, 'midnight +1 day'));
         $translator = $this->getTranslator($chan);
+        $stylingCls = $this->getFactory('!Styling');
 
         do {
             $result     = preg_match(self::TIME_12H_FORMAT, $time, $matches);
@@ -231,7 +233,7 @@ Returns TV schedules for the given channels at the given time.
                 'An error occurred while retrieving '.
                 'the information (<var name="error"/>)'
             );
-            $tpl = new Erebot_Styling($msg, $translator);
+            $tpl = new $stylingCls($msg, $translator);
             $tpl->assign('error', $e->getMessage());
             return $this->sendMessage($target, $tpl->render());
         }
@@ -253,7 +255,7 @@ Returns TV schedules for the given channels at the given time.
                         'timetable" separator=" - "><b><var name="channel"'.
                         '/></b>: <var name="timetable"/></for>');
 
-            $formatter = new Erebot_Styling($msg, $translator);
+            $formatter = new $stylingCls($msg, $translator);
             $formatter->assign('date',      date('r', $timestamp));
             $formatter->assign('programs',  $programs);
             $this->sendMessage($target, $formatter->render());

@@ -16,12 +16,6 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once(
-    dirname(__FILE__) .
-    DIRECTORY_SEPARATOR . 'testenv' .
-    DIRECTORY_SEPARATOR . 'bootstrap.php'
-);
-
 class TestTvRetriever
 {
     protected $ID_mappings = array('foo' => 42, 'bar' => 69);
@@ -69,6 +63,8 @@ class TestTvRetriever
 class ErebotTestModule_Tv
 extends Erebot_Module_TV
 {
+    protected $_dateParser = array('ErebotTestModule_Tv', 'parseDate');
+
     public function setTvRetriever($tv)
     {
         $this->_tv = $tv;
@@ -83,19 +79,57 @@ extends Erebot_Module_TV
     {
         $this->_defaultGroup = $group;
     }
+
+    static public function parseDate($date)
+    {
+        if ($date == 'now')
+            return 502031100;
+        return 502070400;
+    }
 }
 
 class   ErebotIntegrationTest
 extends ErebotModuleTestCase
 {
+    public function _mockPrivateText($source, $text)
+    {
+        $event = $this->getMock(
+            'Erebot_Interface_Event_PrivateText',
+            array(), array(), '', FALSE, FALSE
+        );
+
+        $wrapper = $this->getMock(
+            'Erebot_Interface_TextWrapper',
+            array(), array(), '', FALSE, FALSE
+        );
+
+        $text = explode(' ', $text, 3);
+        $wrapper
+            ->expects($this->any())
+            ->method('getTokens')
+            ->will($this->onConsecutiveCalls($text[1], $text[2]));
+
+        $event
+            ->expects($this->any())
+            ->method('getConnection')
+            ->will($this->returnValue($this->_connection));
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue($source));
+        $event
+            ->expects($this->any())
+            ->method('getText')
+            ->will($this->returnValue($wrapper));
+        return $event;
+    }
+
     public function setUp()
     {
         parent::setUp();
         $this->_module = new ErebotTestModule_Tv(NULL);
-        $this->_module->reload(
-            $this->_connection,
-            0
-        );
+        $this->_module->setFactory('!Styling', $this->_factory['!Styling']);
+        $this->_module->reload($this->_connection, 0);
         $this->_module->setTvRetriever(new TestTvRetriever());
     }
 
@@ -107,10 +141,7 @@ extends ErebotModuleTestCase
 
     public function testMissingDefaultGroup()
     {
-        $event = new Erebot_Event_PrivateText(
-            $this->_connection, 'test',
-            '!tv'
-        );
+        $event = $this->_mockPrivateText('test', '!tv  ');
         $this->_module->handleTv($this->_eventHandler, $event);
 
         $this->assertEquals(1, count($this->_outputBuffer));
@@ -122,17 +153,17 @@ extends ErebotModuleTestCase
 
     public function testUsingDefaultGroupWithChannelOverride()
     {
-        $event = new Erebot_Event_PrivateText(
-            $this->_connection, 'test',
-            '!tv 23h42 foo'
-        );
+        $event = $this->_mockPrivateText('test', '!tv 23h42 foo');
         $this->_module->handleTv($this->_eventHandler, $event);
 
-        $pattern =  "/PRIVMSG test :TV programs for \037.*?\037: ".
-                    "\002foo\002: foo \\(17:23 - 17:42\\) - ".
-                    "\002bar\002: bar \\(17:23 - 17:42\\)/";
+        $expected =  'PRIVMSG test :TV programs for <u><var '.
+                    'name="Thu, 28 Nov 1985 23:42:00 +0000"/></u>: '.
+                    '<for from="array ( \'foo\' => \'foo (17:23 - 17:42)\', '.
+                    '\'bar\' => \'bar (17:23 - 17:42)\', )" key="channel" '.
+                    'item="timetable" separator=" - "><b><var name="channel"/>'.
+                    '</b>: <var name="timetable"/></for>';
         $this->assertEquals(1, count($this->_outputBuffer));
-        $this->assertRegExp($pattern, $this->_outputBuffer[0]);
+        $this->assertEquals($expected, $this->_outputBuffer[0]);
     }
 }
 

@@ -30,7 +30,10 @@ extends Erebot_Module_Base
     public function _reload($flags)
     {
         if ($flags & self::RELOAD_MEMBERS) {
-            $class = $this->parseString('fetcher_class', 'Erebot_Module_TV_Fetcher');
+            $class = $this->parseString(
+                'fetcher_class',
+                'Erebot_Module_TV_Fetcher'
+            );
             /// @TODO: add extra checks (return codes, exceptions, ...)
             // We avoid using "::" on getInstance()
             // to keep 5.2.x compatibility.
@@ -41,9 +44,14 @@ extends Erebot_Module_Base
 
             $config         = $this->_connection->getConfig($this->_channel);
             $moduleConfig   = $config->getModule(get_class($this));
-            $groupFilter    = create_function('$a',
-                'return !strncasecmp($a, "group_", 6);');
-            $groups = array_filter($moduleConfig->getParamsNames(), $groupFilter);
+            $groupFilter    = create_function(
+                '$a',
+                'return !strncasecmp($a, "group_", 6);'
+            );
+            $groups = array_filter(
+                $moduleConfig->getParamsNames(),
+                $groupFilter
+            );
             $this->_customMappings = array();
 
             foreach ($groups as $param) {
@@ -79,8 +87,9 @@ extends Erebot_Module_Base
             $this->_trigger = $registry->registerTriggers($trigger, $matchAny);
             if ($this->_trigger === NULL) {
                 $translator = $this->getTranslator(FALSE);
-                throw new Exception($translator->gettext(
-                    'Could not register TV trigger'));
+                throw new Exception(
+                    $translator->gettext('Could not register TV trigger')
+                );
             }
 
             $this->_handler = new Erebot_EventHandler(
@@ -103,7 +112,10 @@ extends Erebot_Module_Base
     {
     }
 
-    public function getHelp(Erebot_Interface_Event_Base_TextMessage $event, $words)
+    public function getHelp(
+        Erebot_Interface_Event_Base_TextMessage $event,
+                                                $words
+    )
     {
         if ($event instanceof Erebot_Interface_Event_Base_Private) {
             $target = $event->getSource();
@@ -120,10 +132,10 @@ extends Erebot_Module_Base
         $nbArgs     = count($words);
 
         if ($nbArgs == 1 && $words[0] == $moduleName) {
-            $msg = $translator->gettext('
-Provides the <b><var name="trigger"/></b> command which retrieves
-information about TV schedules off the internet.
-');
+            $msg = $translator->gettext(
+                'Provides the <b><var name="trigger"/></b> command which '.
+                'retrieves information about TV schedules off the internet.'
+            );
             $formatter = new Erebot_Styling($msg, $translator);
             $formatter->assign('trigger', $trigger);
             $this->sendMessage($target, $formatter->render());
@@ -134,21 +146,24 @@ information about TV schedules off the internet.
             return FALSE;
 
         if ($words[1] == $trigger) {
-            $msg = $translator->gettext("
-<b>Usage:</b> !<var name='trigger'/> [<u>time</u>] [<u>channels</u>].
-Returns TV schedules for the given channels at the given time.
-[<u>time</u>] can be expressed using either 12h or 24h notation.
-[<u>channels</u>] can be a single channel name, a list of channels
-(separated by commas) or one of the pre-defined groups of channels.
-");
+            $msg = $translator->gettext(
+                "<b>Usage:</b> !<var name='trigger'/> [<u>time</u>] ".
+                "[<u>channels</u>]. Returns TV schedules for the given ".
+                "channels at the given time. [<u>time</u>] can be expressed ".
+                "using either 12h or 24h notation. [<u>channels</u>] can be ".
+                "a single channel name, a list of channels (separated by ".
+                "commas) or one of the pre-defined groups of channels."
+            );
             $formatter = new Erebot_Styling($msg, $translator);
             $formatter->assign('trigger', $trigger);
             $this->sendMessage($target, $formatter->render());
 
-            $msg = $translator->gettext("If none is given, the default group ".
-                    "(<b><var name='default'/></b>) is used. The following ".
-                    "groups are available: <for from='groups' key='group' ".
-                    "item='dummy'><b><var name='group'/></b></for>.");
+            $msg = $translator->gettext(
+                "If none is given, the default group (<b><var ".
+                "name='default'/></b>) is used. The following ".
+                "groups are available: <for from='groups' key='group' ".
+                "item='dummy'><b><var name='group'/></b></for>."
+            );
             $formatter = new Erebot_Styling($msg, $translator);
             $formatter->assign('default', $this->_defaultGroup);
             $formatter->assign('groups', $this->_customMappings);
@@ -172,7 +187,9 @@ Returns TV schedules for the given channels at the given time.
 
         $time       = $event->getText()->getTokens(1, 1);
         $getdate    = getdate(call_user_func($this->_dateParser, 'now'));
-        $tomorrow   = getdate(call_user_func($this->_dateParser, 'midnight +1 day'));
+        $tomorrow   = getdate(
+            call_user_func($this->_dateParser, 'midnight +1 day')
+        );
         $translator = $this->getTranslator($chan);
         $stylingCls = $this->getFactory('!Styling');
 
@@ -203,8 +220,10 @@ Returns TV schedules for the given channels at the given time.
             $getdate['year']    = $tomorrow['year'];
         }
 
-        $timestamp  = mktime($hours, $minutes, 0, $getdate['mon'],
-                            $getdate['mday'], $getdate['year']);
+        $timestamp  = mktime(
+            $hours, $minutes, 0,
+            $getdate['mon'], $getdate['mday'], $getdate['year']
+        );
         $channels   = strtolower($event->getText()->getTokens($result ? 2 : 1));
 
         if (rtrim($channels) == '') {
@@ -221,9 +240,8 @@ Returns TV schedules for the given channels at the given time.
             $channels   = explode(',', $channels);
 
         $ids    = array_filter(
-            array_map(
-            array($this->_tv, 'getIdFromChannel'),
-            $channels));
+            array_map(array($this->_tv, 'getIdFromChannel'), $channels)
+        );
 
         try {
             $infos  = $this->_tv->getChannelsData($timestamp, $ids);
@@ -242,22 +260,28 @@ Returns TV schedules for the given channels at the given time.
         foreach ($infos as $channel => $data) {
             $start      = substr($data['Date_Debut'], -8, -3);
             $end        = substr($data['Date_Fin'], -8, -3);
-            $programs[$channel]   = sprintf('%s (%s - %s)',
-                                        $data['Titre'], $start, $end);
+            $programs[$channel]   = sprintf(
+                '%s (%s - %s)',
+                $data['Titre'], $start, $end
+            );
         }
 
         if (!count($programs))
-            $this->sendMessage($target,
-                $translator->gettext('No such channel(s)'));
+            $this->sendMessage(
+                $target,
+                $translator->gettext('No such channel(s)')
+            );
         else {
-            $msg = $translator->gettext('TV programs for <u><var name="date"/>'.
-                        '</u>: <for from="programs" key="channel" item="'.
-                        'timetable" separator=" - "><b><var name="channel"'.
-                        '/></b>: <var name="timetable"/></for>');
+            $msg = $translator->gettext(
+                'TV programs for <u><var name="date"/></u>: '.
+                '<for from="programs" key="channel" item="timetable" '.
+                'separator=" - "><b><var name="channel"/></b>: '.
+                '<var name="timetable"/></for>'
+            );
 
             $formatter = new $stylingCls($msg, $translator);
-            $formatter->assign('date',      date('r', $timestamp));
-            $formatter->assign('programs',  $programs);
+            $formatter->assign('date', date('r', $timestamp));
+            $formatter->assign('programs', $programs);
             $this->sendMessage($target, $formatter->render());
         }
     }

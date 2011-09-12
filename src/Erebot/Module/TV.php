@@ -247,7 +247,7 @@ extends Erebot_Module_Base
             $infos  = $this->_tv->getChannelsData($timestamp, $ids);
         }
         catch (HTTP_Request2_Exception $e) {
-            $msg = $this->gettext(
+            $msg = $translator->gettext(
                 'An error occurred while retrieving '.
                 'the information (<var name="error"/>)'
             );

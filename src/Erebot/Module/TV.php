@@ -44,13 +44,9 @@ extends Erebot_Module_Base
 
             $config         = $this->_connection->getConfig($this->_channel);
             $moduleConfig   = $config->getModule(get_class($this));
-            $groupFilter    = create_function(
-                '$a',
-                'return !strncasecmp($a, "group_", 6);'
-            );
             $groups = array_filter(
                 $moduleConfig->getParamsNames(),
-                $groupFilter
+                array('self', '_isAGroup')
             );
             $this->_customMappings = array();
 
@@ -110,6 +106,11 @@ extends Erebot_Module_Base
 
     protected function _unload()
     {
+    }
+
+    static protected function _isAGroup($a)
+    {
+        return !strncasecmp($a, "group_", 6);
     }
 
     public function getHelp(

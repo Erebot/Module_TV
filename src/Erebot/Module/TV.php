@@ -269,16 +269,17 @@ extends Erebot_Module_Base
                 $fmt->_('No such channel(s)')
             );
         else {
+            $cls = $this->getFactory('!Styling_DateTime');
             $msg = $fmt->_(
                 'TV programs for <u><var name="date"/></u>: '.
                 '<for from="programs" key="channel" item="timetable" '.
                 'separator=" - "><b><var name="channel"/></b>: '.
                 '<var name="timetable"/></for>',
                 array(
-                    'date' => new Erebot_Styling_DateTime(
+                    'date' => new $cls(
                         $timestamp,
                         IntlDateFormatter::LONG,
-                        IntlDateFormatter::LONG
+                        IntlDateFormatter::MEDIUM
                     ),
                     'programs' => $programs,
                 )

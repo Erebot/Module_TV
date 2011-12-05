@@ -89,7 +89,7 @@ extends Erebot_Module_TV
 }
 
 class   ErebotIntegrationTest
-extends ErebotModuleTestCase
+extends Erebot_Testenv_Module_TestCase
 {
     public function _mockPrivateText($source, $text)
     {
@@ -126,9 +126,9 @@ extends ErebotModuleTestCase
 
     public function setUp()
     {
-        parent::setUp();
         $this->_module = new ErebotTestModule_Tv(NULL);
-        $this->_module->setFactory('!Styling', $this->_factory['!Styling']);
+        parent::setUp();
+
         $this->_module->reload($this->_connection, 0);
         $this->_module->setTvRetriever(new TestTvRetriever());
     }
@@ -157,7 +157,7 @@ extends ErebotModuleTestCase
         $this->_module->handleTv($this->_eventHandler, $event);
 
         $expected =  'PRIVMSG test :TV programs for <u><var '.
-                    'name="Thu, 28 Nov 1985 23:42:00 +0000"/></u>: '.
+                    'value="array ( 0 => 502069320, 1 => 1, 2 => 2, )"/></u>: '.
                     '<for from="array ( \'foo\' => \'foo (17:23 - 17:42)\', '.
                     '\'bar\' => \'bar (17:23 - 17:42)\', )" key="channel" '.
                     'item="timetable" separator=" - "><b><var name="channel"/>'.

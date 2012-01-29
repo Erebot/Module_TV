@@ -16,22 +16,59 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * \brief
+ *      Fetcher for telerama's TV programs.
+ *
+ * This class is mostly useful to retrieve TV programs
+ * for french TV channels, even though a few other
+ * (international) channels are also supported.
+ */
 class Erebot_Module_TV_Fetcher
 {
-    const TARGET_URL    = 'http://television.telerama.fr/tele/grille.php';
+    /// URL to query to retrieve the information.
+    const TARGET_URL = 'http://television.telerama.fr/tele/grille.php';
 
+    /// Timeout for the whole request (in seconds).
     protected $_timeout;
+
+    /// Timeout for the connection (in seconds).
     protected $_connTimeout;
+
+    /// Maps TV channels to their assigned ID (this is specific to telerama).
     protected $_mapping;
 
+    /**
+     * Creates a new instance of the fetcher.
+     *
+     * \param int $timeout
+     *      How many seconds the whole request has
+     *      in order to complete before it is considered
+     *      a failure.
+     *
+     * \param int $connTimeout
+     *      How many seconds it may take up for the
+     *      connection to telerama's server to be successful.
+     */
     public function __construct($timeout, $connTimeout)
     {
         $this->_timeout = (int) $timeout;
         $this->_connTimeout = (int) $connTimeout;
-        $this->updateIds();
+        $this->_updateIds();
     }
 
-    public function updateIds()
+    /**
+     * Updates the internal mapping.
+     *
+     * \retval bool
+     *      Returns TRUE on success, FALSE on failure.
+     *
+     * \post
+     *      After this method completes successfully,
+     *      each TV channel recognized by Telerama is
+     *      associated with its ID.
+     */
+    protected function _updateIds()
     {
         $request = new HTTP_Request2(
             self::TARGET_URL,
@@ -68,7 +105,7 @@ class Erebot_Module_TV_Fetcher
 
         $select     = $domdoc->getElementsByTagName('select')->item(0);
         if ($select === NULL)
-            return;
+            return FALSE;
 
         $this->_mapping = array();
         $select->normalize();
@@ -91,13 +128,34 @@ class Erebot_Module_TV_Fetcher
             $this->_mapping[$channel] = $value;
             $this->_mapping[str_replace(' ', '', $channel)] = $value;
         }
+        return TRUE;
     }
 
+    /**
+     * Returns a list with the names of all
+     * supported TV channels.
+     *
+     * \retval list
+     *      The names of all TV channels that may
+     *      be queried through this fetcher.
+     */
     public function getSupportedChannels()
     {
         return array_keys($this->_mapping);
     }
 
+    /**
+     * Returns the internal ID associated
+     * with some channel.
+     *
+     * \param string $channel
+     *      Some TV channel whose internal ID
+     *      we're interested in.
+     *
+     * \retval mixed
+     *      Internal ID for that channel (as an integer),
+     *      or NULL if the given channel is not supported.
+     */
     public function getIdFromChannel($channel)
     {
         $channel = strtolower(trim($channel));
@@ -106,11 +164,25 @@ class Erebot_Module_TV_Fetcher
         return $this->_mapping[$channel];
     }
 
+    /**
+     * Returns information on the programs
+     * for some TV channels.
+     *
+     * \param int $timestamp
+     *      Return information on TV programs
+     *      that will be airing on this precise
+     *      point in time.
+     *
+     * \param list $ids
+     *      A list with the IDs of the TV channels
+     *      to query.
+     *
+     * \retval array
+     *      Information about the TV programs airing
+     *      at the given time on the given channels.
+     */
     public function getChannelsData($timestamp, $ids)
     {
-        if (!is_array($ids))
-            $ids = array($ids);
-
         $request = new HTTP_Request2(
             self::TARGET_URL,
             HTTP_Request2::METHOD_POST,

@@ -16,17 +16,49 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * \brief
+ *      A module that retrieves information on TV programs
+ *      from the Internet.
+ */
 class   Erebot_Module_TV
 extends Erebot_Module_Base
 {
+    /// Fetcher instance to use to retrieve the information.
     protected $_tv;
+
+    /// Maps group names to a list of the TV channels they contain.
     protected $_customMappings = array();
+
+    /// Default group of TV channels to use when retrieving information.
     protected $_defaultGroup = NULL;
+
+    /**
+     * A parser that turns dates and times expressed
+     * in English into valid Epoch timestamps.
+     */
     protected $_dateParser = 'strtotime';
 
+
+    /// Pattern used to read a time specification in 12 hours format.
     const TIME_12H_FORMAT = '/^(0?[0-9]|1[0-2])[:h\.]?([0-5][0-9])?([ap]m)$/i';
+
+    /// Pattern used to read a time specification in 24 hours format.
     const TIME_24H_FORMAT = '/^([0-1]?[0-9]|2[0-3])[:h\.]?([0-5][0-9])?$/i';
 
+
+    /**
+     * This method is called whenever the module is (re)loaded.
+     *
+     * \param int $flags
+     *      A bitwise OR of the Erebot_Module_Base::RELOAD_*
+     *      constants. Your method should take proper actions
+     *      depending on the value of those flags.
+     *
+     * \note
+     *      See the documentation on individual RELOAD_*
+     *      constants for a list of possible values.
+     */
     public function _reload($flags)
     {
         if ($flags & self::RELOAD_MEMBERS) {
@@ -35,8 +67,6 @@ extends Erebot_Module_Base
                 'Erebot_Module_TV_Fetcher'
             );
             /// @TODO: add extra checks (return codes, exceptions, ...)
-            // We avoid using "::" on getInstance()
-            // to keep 5.2.x compatibility.
             $this->_tv  = new $class(
                 $this->parseInt('timeout', 8),
                 $this->parseInt('conn_timeout', 3)
@@ -104,15 +134,35 @@ extends Erebot_Module_Base
         }
     }
 
-    protected function _unload()
+    /**
+     * Identifies groups of TV channels
+     * from the configuration file.
+     *
+     * \param $candidate
+     *      Name of a parameter that is a potential
+     *      group of TV channels.
+     *
+     * \retval bool
+     *      TRUE if the given parameter represents
+     *      a group of TV channels, FALSE otherwise.
+     */
+    static protected function _isAGroup($candidate)
     {
+        return !strncasecmp($candidate, "group_", 6);
     }
 
-    static protected function _isAGroup($a)
-    {
-        return !strncasecmp($a, "group_", 6);
-    }
-
+    /**
+     * Provides help about this module.
+     *
+     * \param Erebot_Interface_Event_Base_TextMessage $event
+     *      Some help request.
+     *
+     * \param array $words
+     *      Parameters passed with the request. This is the same
+     *      as this module's name when help is requested on the
+     *      module itself (in opposition with help on a specific
+     *      command provided by the module).
+     */
     public function getHelp(
         Erebot_Interface_Event_Base_TextMessage $event,
                                                 $words
@@ -128,7 +178,6 @@ extends Erebot_Module_Base
         $fmt        = $this->getFormatter($chan);
         $trigger    = $this->parseString('trigger', 'tv');
 
-        $bot        = $this->_connection->getBot();
         $moduleName = strtolower(get_class());
         $nbArgs     = count($words);
 
@@ -172,6 +221,18 @@ extends Erebot_Module_Base
         }
     }
 
+    /**
+     * Handles a request for information on TV programs.
+     *
+     * \param Erebot_Interface_EventHandler $handler
+     *      Handler that triggered this event.
+     *
+     * \param Erebot_Interface_Event_Base_TextMessage $event
+     *      A request for TV programs that may include time
+     *      and TV channels constraints.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function handleTV(
         Erebot_Interface_EventHandler           $handler,
         Erebot_Interface_Event_Base_TextMessage $event

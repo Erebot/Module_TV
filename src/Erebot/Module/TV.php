@@ -108,7 +108,6 @@ extends Erebot_Module_Base
                 $registry->freeTriggers($this->_trigger, $matchAny);
             }
 
-            $this->registerHelpMethod(array($this, 'getHelp'));
             $trigger        = $this->parseString('trigger', 'tv');
             $this->_trigger = $registry->registerTriggers($trigger, $matchAny);
             if ($this->_trigger === NULL) {
@@ -131,6 +130,9 @@ extends Erebot_Module_Base
                 )
             );
             $this->_connection->addEventHandler($this->_handler);
+
+            $cls = $this->getFactory('!Callable');
+            $this->registerHelpMethod(new $cls(array($this, 'getHelp')));
         }
     }
 

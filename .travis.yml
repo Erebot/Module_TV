@@ -15,6 +15,9 @@ notifications:
 
 before_script:
     - git submodule update --init
+    - (php -m | grep intl &> /dev/null) || (echo -e "\n\n" | sudo pecl install pecl/intl)
+    - (php -m | grep intl &> /dev/null) || echo "extension_dir=`php-config --extension-dir`" >> `php --ini | grep "Scan for additional" | sed -e "s|.*:\s*||"`/intl.ini
+    - (php -m | grep intl &> /dev/null) || echo "extension=intl.so" >> `php --ini | grep "Scan for additional" | sed -e "s|.*:\s*||"`/intl.ini
 
 script: phpunit --bootstrap tests/testenv/bootstrap.php tests/
 

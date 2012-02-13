@@ -10,9 +10,11 @@ to work properly:
 *   Erebot_API (some specific version may be required depending
     on this module's version)
 *   `HTTP_Request2`_ (which in turn requires `Net_URL2`_)
+*   The :pecl:`intl` extension.
 
 Erebot (core) adds its own set of `prerequisites`_ which usually superseed
 those.
+
 
 ..  _`HTTP_Request2`:
     http://pear.php.net/package/HTTP_Request2/
@@ -22,3 +24,4 @@ those.
     http://fpoirotte.github.com/Erebot/Prerequisites.html
 
 .. vim: ts=4 et
+

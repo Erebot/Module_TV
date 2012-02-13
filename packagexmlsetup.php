@@ -35,5 +35,7 @@ foreach (array($package, $compatible) as $obj) {
     foreach ($deps as $req => $data)
         foreach ($data as $dep)
             $obj->dependencies[$req]->package[$dep]->save();
+
+    $obj->dependencies['required']->extension['intl']->save();
 }
 

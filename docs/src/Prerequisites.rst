@@ -21,7 +21,7 @@ those.
 ..  _`Net_URL2`:
     http://pear.php.net/package/Net_URL2/
 ..  _`prerequisites`:
-    http://fpoirotte.github.com/Erebot/Prerequisites.html
+    http://erebot.github.com/Erebot/Prerequisites.html
 
 .. vim: ts=4 et
 

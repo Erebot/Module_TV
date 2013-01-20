@@ -1,0 +1,42 @@
+{
+    "name": "erebot/erebot-module-tv",
+    "description": "Erebot module to retrieve information on TV schedules",
+    "keywords": ["Erebot", "IRC", "bot", "module"],
+    "homepage": "https://github.com/Erebot/Erebot_Module_TV",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "François Poirotte",
+            "email": "clicky@erebot.net",
+            "role": "lead"
+        }
+    ],
+    "support": {
+        "email": "erebot@erebot.net",
+        "issues": "https://github.com/Erebot/Erebot_Module_TV/issues",
+        "wiki": "http://erebot.github.com/Erebot_Module_TV/",
+        "irc": "irc://irc.iiens.net/Erebot",
+        "source": "https://github.com/Erebot/Erebot_Module_TV"
+    },
+    "repositories": [
+        {
+            "type": "pear",
+            "url": "http://pear.php.net"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.2",
+        "erebot/erebot-api": "*",
+        "erebot/erebot-module-triggerregistry": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Erebot": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}

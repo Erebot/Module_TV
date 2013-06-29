@@ -1,5 +1,5 @@
 {
-    "name": "erebot/erebot-module-tv",
+    "name": "erebot/tv-module",
     "description": "Erebot module to retrieve information on TV schedules",
     "keywords": ["Erebot", "IRC", "bot", "module"],
     "homepage": "https://github.com/Erebot/Erebot_Module_TV",
@@ -20,14 +20,23 @@
     },
     "repositories": [
         {
-            "type": "pear",
-            "url": "http://pear.php.net"
+            "type": "composer",
+            "url": "http://packages.erebot.net"
         }
     ],
     "require": {
         "php": ">=5.2.2",
-        "erebot/erebot-api": "*",
-        "erebot/erebot-module-triggerregistry": "*"
+        "pear/http_request2": "dev-master",
+        "pear/net_url2": "dev-master",
+        "pear/pear_exception": "dev-master",
+        "erebot/triggerregistry-module": "dev-master",
+        "erebot/api": "dev-master",
+        "erebot/installers": "dev-master",
+        "erebot/generic-doc": "dev-master"
+    },
+    "require-dev": {
+        "erebot/buildenv": "dev-master",
+        "erebot/testenv": "dev-master"
     },
     "autoload": {
         "psr-0": {

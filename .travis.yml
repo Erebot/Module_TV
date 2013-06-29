@@ -1,10 +1,10 @@
 language: php
 
 php:
-    - 5.2
     - 5.3.3
     - 5.3
     - 5.4
+    - 5.5
 
 branches:
     only: master
@@ -14,10 +14,13 @@ notifications:
     irc: "irc.iiens.net#Erebot"
 
 before_script:
-    - git submodule update --init
+    - wget http://getcomposer.org/composer.phar
     - (php -m | grep intl &> /dev/null) || (echo -e "\n\n" | sudo pecl install pecl/intl)
     - (php -m | grep intl &> /dev/null) || echo "extension_dir=`php-config --extension-dir`" >> `php --ini | grep "Scan for additional" | sed -e "s|.*:\s*||"`/intl.ini
     - (php -m | grep intl &> /dev/null) || echo "extension=intl.so" >> `php --ini | grep "Scan for additional" | sed -e "s|.*:\s*||"`/intl.ini
+    - if [[ "$TRAVIS_PHP_VERSION" = "5.3.3" ]]; then php composer.phar install --dev --prefer-source; fi
+    - if [[ "$TRAVIS_PHP_VERSION" != "5.3.3" ]]; then php composer.phar install --dev; fi
 
-script: phpunit --bootstrap tests/testenv/bootstrap.php tests/
+script:
+    - phpunit --bootstrap vendor/erebot/testenv/bootstrap.php tests/
 

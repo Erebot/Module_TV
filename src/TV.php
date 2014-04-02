@@ -16,28 +16,29 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+namespace Erebot\Module;
+
 /**
  * \brief
  *      A module that retrieves information on TV programs
  *      from the Internet.
  */
-class   Erebot_Module_TV
-extends Erebot_Module_Base
+class TV extends \Erebot\Module\Base implements \Erebot\Interfaces\HelpEnabled
 {
     /// Fetcher instance to use to retrieve the information.
-    protected $_tv;
+    protected $tv;
 
     /// Maps group names to a list of the TV channels they contain.
-    protected $_customMappings = array();
+    protected $customMappings = array();
 
     /// Default group of TV channels to use when retrieving information.
-    protected $_defaultGroup = NULL;
+    protected $defaultGroup = null;
 
     /**
      * A parser that turns dates and times expressed
      * in English into valid Epoch timestamps.
      */
-    protected $_dateParser = 'strtotime';
+    protected $dateParser = 'strtotime';
 
 
     /// Pattern used to read a time specification in 12 hours format.
@@ -51,7 +52,7 @@ extends Erebot_Module_Base
      * This method is called whenever the module is (re)loaded.
      *
      * \param int $flags
-     *      A bitwise OR of the Erebot_Module_Base::RELOAD_*
+     *      A bitwise OR of the Erebot::Module::Base::RELOAD_*
      *      constants. Your method should take proper actions
      *      depending on the value of those flags.
      *
@@ -59,80 +60,71 @@ extends Erebot_Module_Base
      *      See the documentation on individual RELOAD_*
      *      constants for a list of possible values.
      */
-    public function _reload($flags)
+    public function reload($flags)
     {
         if ($flags & self::RELOAD_MEMBERS) {
             $class = $this->parseString(
                 'fetcher_class',
-                'Erebot_Module_TV_Fetcher'
+                '\\Erebot\\Module\\TV\\Fetcher'
             );
             /// @TODO: add extra checks (return codes, exceptions, ...)
-            $this->_tv  = new $class(
-                $this->parseInt('timeout', 8),
-                $this->parseInt('conn_timeout', 3)
+            $this->tv  = new $class(
+                $this->parseInt('timeout', 8)
             );
 
-            $config         = $this->_connection->getConfig($this->_channel);
+            $config         = $this->connection->getConfig($this->channel);
             $moduleConfig   = $config->getModule(get_class($this));
             $groups = array_filter(
                 $moduleConfig->getParamsNames(),
-                array('self', '_isAGroup')
+                array('self', 'isAGroup')
             );
-            $this->_customMappings = array();
+            $this->customMappings = array();
 
             foreach ($groups as $param) {
                 $group = substr($param, 6);
                 $chans = $this->parseString($param);
-                $this->_customMappings[$group] =
-                    array_map('trim', explode(',', $chans));
+                $this->customMappings[$group] = array_map('trim', explode(',', $chans));
             }
 
             try {
-                $this->_defaultGroup = $this->parseString('default_group');
-                if (!isset($this->_customMappings[$this->_defaultGroup]))
-                    $this->_defaultGroup = NULL;
-            }
-            catch (Erebot_NotFoundException $e) {
-                $this->_defaultGroup = NULL;
+                $this->defaultGroup = $this->parseString('default_group');
+                if (!isset($this->customMappings[$this->defaultGroup])) {
+                    $this->defaultGroup = null;
+                }
+            } catch (\Erebot\NotFoundException $e) {
+                $this->defaultGroup = null;
             }
         }
 
         if ($flags & self::RELOAD_HANDLERS) {
-            $registry   = $this->_connection->getModule(
-                'Erebot_Module_TriggerRegistry'
-            );
-            $matchAny = Erebot_Utils::getVStatic($registry, 'MATCH_ANY');
-
+            $registry   = $this->connection->getModule('\\Erebot\\Module\\TriggerRegistry');
             if (!($flags & self::RELOAD_INIT)) {
-                $this->_connection->removeEventHandler($this->_handler);
-                $registry->freeTriggers($this->_trigger, $matchAny);
+                $this->connection->removeEventHandler($this->handler);
+                $registry->freeTriggers($this->trigger, $registry::MATCH_ANY);
             }
 
             $trigger        = $this->parseString('trigger', 'tv');
-            $this->_trigger = $registry->registerTriggers($trigger, $matchAny);
-            if ($this->_trigger === NULL) {
-                $fmt = $this->getFormatter(FALSE);
-                throw new Exception(
+            $this->trigger = $registry->registerTriggers($trigger, $registry::MATCH_ANY);
+            if ($this->trigger === null) {
+                $fmt = $this->getFormatter(false);
+                throw new \Exception(
                     $fmt->_('Could not register TV trigger')
                 );
             }
 
-            $this->_handler = new Erebot_EventHandler(
-                new Erebot_Callable(array($this, 'handleTV')),
-                new Erebot_Event_Match_All(
-                    new Erebot_Event_Match_InstanceOf(
-                        'Erebot_Interface_Event_Base_TextMessage'
+            $this->handler = new \Erebot\EventHandler(
+                \Erebot\CallableWrapper::wrap(array($this, 'handleTV')),
+                new \Erebot\Event\Match\All(
+                    new \Erebot\Event\Match\Type(
+                        '\\Erebot\\Interfaces\\Event\\Base\\TextMessage'
                     ),
-                    new Erebot_Event_Match_Any(
-                        new Erebot_Event_Match_TextStatic($trigger, TRUE),
-                        new Erebot_Event_Match_TextWildcard($trigger.' *', TRUE)
+                    new \Erebot\Event\Match\Any(
+                        new \Erebot\Event\Match\TextStatic($trigger, true),
+                        new \Erebot\Event\Match\TextWildcard($trigger.' *', true)
                     )
                 )
             );
-            $this->_connection->addEventHandler($this->_handler);
-
-            $cls = $this->getFactory('!Callable');
-            $this->registerHelpMethod(new $cls(array($this, 'getHelp')));
+            $this->connection->addEventHandler($this->handler);
         }
     }
 
@@ -145,10 +137,10 @@ extends Erebot_Module_Base
      *      group of TV channels.
      *
      * \retval bool
-     *      TRUE if the given parameter represents
-     *      a group of TV channels, FALSE otherwise.
+     *      \b true if the given parameter represents
+     *      a group of TV channels, \b false otherwise.
      */
-    static protected function _isAGroup($candidate)
+    protected static function isAGroup($candidate)
     {
         return !strncasecmp($candidate, "group_", 6);
     }
@@ -156,45 +148,43 @@ extends Erebot_Module_Base
     /**
      * Provides help about this module.
      *
-     * \param Erebot_Interface_Event_Base_TextMessage $event
+     * \param Erebot::Interfaces::Event::Base::TextMessage $event
      *      Some help request.
      *
-     * \param Erebot_Interface_TextWrapper $words
+     * \param Erebot::Interfaces::TextWrapper $words
      *      Parameters passed with the request. This is the same
      *      as this module's name when help is requested on the
      *      module itself (in opposition with help on a specific
      *      command provided by the module).
      */
     public function getHelp(
-        Erebot_Interface_Event_Base_TextMessage $event,
-        Erebot_Interface_TextWrapper            $words
-    )
-    {
-        if ($event instanceof Erebot_Interface_Event_Base_Private) {
+        \Erebot\Interfaces\Event\Base\TextMessage $event,
+        \Erebot\Interfaces\TextWrapper            $words
+    ) {
+        if ($event instanceof \Erebot\Interfaces\Event\Base\PrivateMessage) {
             $target = $event->getSource();
-            $chan   = NULL;
-        }
-        else
+            $chan   = null;
+        } else {
             $target = $chan = $event->getChan();
+        }
 
         $fmt        = $this->getFormatter($chan);
         $trigger    = $this->parseString('trigger', 'tv');
-
-        $moduleName = strtolower(get_class());
         $nbArgs     = count($words);
 
-        if ($nbArgs == 1 && $words[0] == $moduleName) {
+        if ($nbArgs == 1 && $words[0] === get_called_class()) {
             $msg = $fmt->_(
                 'Provides the <b><var name="trigger"/></b> command which '.
                 'retrieves information about TV schedules off the internet.',
                 array('trigger' => $trigger)
             );
             $this->sendMessage($target, $msg);
-            return TRUE;
+            return true;
         }
 
-        if (count($nbArgs) < 2)
-            return FALSE;
+        if (count($nbArgs) < 2) {
+            return false;
+        }
 
         if ($words[1] == $trigger) {
             $msg = $fmt->_(
@@ -214,44 +204,41 @@ extends Erebot_Module_Base
                 "groups are available: <for from='groups' key='group' ".
                 "item='dummy'><b><var name='group'/></b></for>.",
                 array(
-                    'default' => $this->_defaultGroup,
-                    'groups' => $this->_customMappings,
+                    'default' => $this->defaultGroup,
+                    'groups' => $this->customMappings,
                 )
             );
             $this->sendMessage($target, $msg);
-            return TRUE;
+            return true;
         }
     }
 
     /**
      * Handles a request for information on TV programs.
      *
-     * \param Erebot_Interface_EventHandler $handler
+     * \param Erebot::Interfaces::EventHandler $handler
      *      Handler that triggered this event.
      *
-     * \param Erebot_Interface_Event_Base_TextMessage $event
+     * \param Erebot::Interfaces::Event::Base::TextMessage $event
      *      A request for TV programs that may include time
      *      and TV channels constraints.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handleTV(
-        Erebot_Interface_EventHandler           $handler,
-        Erebot_Interface_Event_Base_TextMessage $event
-    )
-    {
-        if ($event instanceof Erebot_Interface_Event_Base_Private) {
+        \Erebot\Interfaces\EventHandler           $handler,
+        \Erebot\Interfaces\Event\Base\TextMessage $event
+    ) {
+        if ($event instanceof \Erebot\Interfaces\Event\Base\PrivateMessage) {
             $target = $event->getSource();
-            $chan   = NULL;
-        }
-        else
+            $chan   = null;
+        } else {
             $target = $chan = $event->getChan();
+        }
 
         $time       = $event->getText()->getTokens(1, 1);
-        $getdate    = getdate(call_user_func($this->_dateParser, 'now'));
-        $tomorrow   = getdate(
-            call_user_func($this->_dateParser, 'midnight +1 day')
-        );
+        $getdate    = getdate(call_user_func($this->dateParser, 'now'));
+        $tomorrow   = getdate(call_user_func($this->dateParser, 'midnight +1 day'));
         $fmt        = $this->getFormatter($chan);
 
         do {
@@ -281,33 +268,29 @@ extends Erebot_Module_Base
             $getdate['year']    = $tomorrow['year'];
         }
 
-        $timestamp  = mktime(
-            $hours, $minutes, 0,
-            $getdate['mon'], $getdate['mday'], $getdate['year']
-        );
+        $timestamp  = mktime($hours, $minutes, 0, $getdate['mon'], $getdate['mday'], $getdate['year']);
         $channels   = strtolower($event->getText()->getTokens($result ? 2 : 1));
 
         if (rtrim($channels) == '') {
-            if ($this->_defaultGroup)
-                $channels   = $this->_customMappings[$this->_defaultGroup];
-            else {
+            if ($this->defaultGroup) {
+                $channels   = $this->customMappings[$this->defaultGroup];
+            } else {
                 $msg = $fmt->_('No channel given and no default.');
                 return $this->sendMessage($target, $msg);
             }
-        }
-        else if (isset($this->_customMappings[$channels]))
-            $channels   = $this->_customMappings[$channels];
-        else
+        } elseif (isset($this->customMappings[$channels])) {
+            $channels   = $this->customMappings[$channels];
+        } else {
             $channels   = explode(',', $channels);
+        }
 
         $ids    = array_filter(
-            array_map(array($this->_tv, 'getIdFromChannel'), $channels)
+            array_map(array($this->tv, 'getIdFromChannel'), $channels)
         );
 
         try {
-            $infos  = $this->_tv->getChannelsData($timestamp, $ids);
-        }
-        catch (HTTP_Request2_Exception $e) {
+            $infos  = $this->tv->getChannelsData($timestamp, $ids);
+        } catch (\Exception $e) {
             $msg = $fmt->_(
                 'An error occurred while retrieving '.
                 'the information (<var name="error"/>)',
@@ -320,19 +303,16 @@ extends Erebot_Module_Base
         foreach ($infos as $channel => $data) {
             $start      = substr($data['Date_Debut'], -8, -3);
             $end        = substr($data['Date_Fin'], -8, -3);
-            $programs[$channel]   = sprintf(
-                '%s (%s - %s)',
-                $data['Titre'], $start, $end
-            );
+            $programs[$channel] = sprintf('%s (%s - %s)', $data['Titre'], $start, $end);
         }
 
-        if (!count($programs))
+        if (!count($programs)) {
             $this->sendMessage(
                 $target,
                 $fmt->_('No such channel(s)')
             );
-        else {
-            $cls = $this->getFactory('!Styling_DateTime');
+        } else {
+            $cls = $this->getFactory('!Styling\\Variables\\DateTime');
             $msg = $fmt->_(
                 'TV programs for <u><var name="date"/></u>: '.
                 '<for from="programs" key="channel" item="timetable" '.
@@ -341,8 +321,8 @@ extends Erebot_Module_Base
                 array(
                     'date' => new $cls(
                         $timestamp,
-                        IntlDateFormatter::LONG,
-                        IntlDateFormatter::MEDIUM
+                        \IntlDateFormatter::LONG,
+                        \IntlDateFormatter::MEDIUM
                     ),
                     'programs' => $programs,
                 )
@@ -351,4 +331,3 @@ extends Erebot_Module_Base
         }
     }
 }
-

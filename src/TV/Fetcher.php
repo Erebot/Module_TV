@@ -16,6 +16,8 @@
     along with Erebot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+namespace Erebot\Module\TV;
+
 /**
  * \brief
  *      Fetcher for telerama's TV programs.
@@ -24,19 +26,16 @@
  * for french TV channels, even though a few other
  * (international) channels are also supported.
  */
-class Erebot_Module_TV_Fetcher
+class Fetcher
 {
     /// URL to query to retrieve the information.
     const TARGET_URL = 'http://television.telerama.fr/tele/grille.php';
 
     /// Timeout for the whole request (in seconds).
-    protected $_timeout;
-
-    /// Timeout for the connection (in seconds).
-    protected $_connTimeout;
+    protected $timeout;
 
     /// Maps TV channels to their assigned ID (this is specific to telerama).
-    protected $_mapping;
+    protected $mapping;
 
     /**
      * Creates a new instance of the fetcher.
@@ -45,16 +44,11 @@ class Erebot_Module_TV_Fetcher
      *      How many seconds the whole request has
      *      in order to complete before it is considered
      *      a failure.
-     *
-     * \param int $connTimeout
-     *      How many seconds it may take up for the
-     *      connection to telerama's server to be successful.
      */
-    public function __construct($timeout, $connTimeout)
+    public function __construct($timeout)
     {
-        $this->_timeout = (int) $timeout;
-        $this->_connTimeout = (int) $connTimeout;
-        $this->_updateIds();
+        $this->timeout = (int) $timeout;
+        $this->updateIds();
     }
 
     /**
@@ -68,67 +62,65 @@ class Erebot_Module_TV_Fetcher
      *      each TV channel recognized by Telerama is
      *      associated with its ID.
      */
-    protected function _updateIds()
+    protected function updateIds()
     {
-        $request = new HTTP_Request2(
+        $response = \Requests::request(
             self::TARGET_URL,
-            HTTP_Request2::METHOD_GET,
+            array(),
+            array('grille', 'telerama'),
             array(
-                'follow_redirects'  => TRUE,
-                'ssl_verify_peer'   => FALSE,
-                'ssl_verify_host'   => FALSE,
-                'timeout'           => $this->_timeout,
-                'connect_timeout'   => $this->_connTimeout,
+                'follow_redirects'  => true,
+                'timeout'           => $this->timeout,
             )
         );
-        $url = $request->getUrl();
-        $url->setQueryVariable('grille', 'telerama');
 
-        $response = $request->send();
-        $source = $response->getBody();
+        $source = $response->body;
         $source =   '<html><head><meta http-equiv="Content-Type" '.
                     'content="text/html; charset=utf-8"/></head>'.
                     '<body>'.$source.'</body></html>';
 
-        $internal   = libxml_use_internal_errors(TRUE);
-        $domdoc     = new DOMDocument();
-        $domdoc->validateOnParse        = FALSE;
-        $domdoc->preserveWhitespace     = FALSE;
-        $domdoc->strictErrorChecking    = FALSE;
-        $domdoc->substituteEntities     = FALSE;
-        $domdoc->resolveExternals       = FALSE;
-        $domdoc->recover                = TRUE;
+        $internal   = libxml_use_internal_errors(true);
+        $domdoc     = new \DOMDocument();
+        $domdoc->validateOnParse        = false;
+        $domdoc->preserveWhitespace     = false;
+        $domdoc->strictErrorChecking    = false;
+        $domdoc->substituteEntities     = false;
+        $domdoc->resolveExternals       = false;
+        $domdoc->recover                = true;
         $domdoc->loadHTML($source);
 
         libxml_clear_errors();
         libxml_use_internal_errors($internal);
 
         $select     = $domdoc->getElementsByTagName('select')->item(0);
-        if ($select === NULL)
-            return FALSE;
+        if ($select === null) {
+            return false;
+        }
 
-        $this->_mapping = array();
+        $this->mapping = array();
         $select->normalize();
 
         foreach ($select->childNodes as $child) {
-            if ($child->nodeType != XML_ELEMENT_NODE ||
-                $child->nodeName != 'option')
+            if ($child->nodeType != XML_ELEMENT_NODE || $child->nodeName != 'option') {
                 continue;
+            }
 
             $valueNode  = $child->attributes->getNamedItem('value');
-            if ($valueNode === NULL)
+            if ($valueNode === null) {
                 continue;
+            }
 
             $value      = $valueNode->nodeValue;
-            if (!ctype_digit($value))
+            if (!ctype_digit($value)) {
                 continue;
+            }
 
             $value      = (int) $value;
             $channel    = strtolower($child->nodeValue);
-            $this->_mapping[$channel] = $value;
-            $this->_mapping[str_replace(' ', '', $channel)] = $value;
+            $this->mapping[$channel] = $value;
+            $this->mapping[str_replace(' ', '', $channel)] = $value;
         }
-        return TRUE;
+        return true;
     }
 
     /**
@@ -141,7 +133,7 @@ class Erebot_Module_TV_Fetcher
      */
     public function getSupportedChannels()
     {
-        return array_keys($this->_mapping);
+        return array_keys($this->mapping);
     }
 
     /**
@@ -159,9 +151,10 @@ class Erebot_Module_TV_Fetcher
     public function getIdFromChannel($channel)
     {
         $channel = strtolower(trim($channel));
-        if (!isset($this->_mapping[$channel]))
-            return NULL;
-        return $this->_mapping[$channel];
+        if (!isset($this->mapping[$channel])) {
+            return null;
+        }
+        return $this->mapping[$channel];
     }
 
     /**
@@ -183,18 +176,9 @@ class Erebot_Module_TV_Fetcher
      */
     public function getChannelsData($timestamp, $ids)
     {
-        $request = new HTTP_Request2(
+        $response = \Requests::request(
             self::TARGET_URL,
-            HTTP_Request2::METHOD_POST,
-            array(
-                'follow_redirects'  => TRUE,
-                'ssl_verify_peer'   => FALSE,
-                'ssl_verify_host'   => FALSE,
-                'timeout'           => $this->_timeout,
-                'connect_timeout'   => $this->_connTimeout,
-            )
-        );
-        $request->addPostParameter(
+            array(),
             array(
                 'xajax'     => 'chargerProgramme',
                 'xajaxargs' => array(
@@ -202,29 +186,33 @@ class Erebot_Module_TV_Fetcher
                     implode(',', $ids),
                 ),
                 'xajaxr'    => time(),
+            ),
+            \Requests::POST,
+            array(
+                'follow_redirects'  => true,
+                'timeout'           => $this->timeout,
             )
         );
 
-        $response = $request->send();
-        $sxml = simplexml_load_string($response->getBody());
+        $sxml = simplexml_load_string($response->body);
         $source = '';
         foreach ($sxml->cmd as $cmd) {
-            if (!isset($cmd['n']) || (string) $cmd['n'] != 'as')
+            if (!isset($cmd['n']) || (string) $cmd['n'] != 'as') {
                 continue;
+            }
 
             $source = (string) $cmd;
             break;
         }
 
-        $internal = libxml_use_internal_errors(TRUE);
-
-        $domdoc = new DOMDocument();
-        $domdoc->validateOnParse        = FALSE;
-        $domdoc->preserveWhitespace     = FALSE;
-        $domdoc->strictErrorChecking    = FALSE;
-        $domdoc->substituteEntities     = FALSE;
-        $domdoc->resolveExternals       = FALSE;
-        $domdoc->recover                = TRUE;
+        $internal   = libxml_use_internal_errors(true);
+        $domdoc     = new \DOMDocument();
+        $domdoc->validateOnParse        = false;
+        $domdoc->preserveWhitespace     = false;
+        $domdoc->strictErrorChecking    = false;
+        $domdoc->substituteEntities     = false;
+        $domdoc->resolveExternals       = false;
+        $domdoc->recover                = true;
         $source =   '<html><head><meta http-equiv="Content-Type" '.
                     'content="text/html; charset=utf-8"/></head>'.
                     '<body>'.$source.'</body></html>';
@@ -237,23 +225,24 @@ class Erebot_Module_TV_Fetcher
         $infos  = array();
         foreach ($divs as $div) {
             $idNode = $div->attributes->getNamedItem('id');
-            if ($idNode === NULL ||
-                strncmp($idNode->nodeValue, 'data_', 5))
+            if ($idNode === null || strncmp($idNode->nodeValue, 'data_', 5)) {
                 continue;
+            }
 
             $json = trim($div->nodeValue);
-            $data = json_decode($json, TRUE);
-            if ($data === FALSE)
+            $data = json_decode($json, true);
+            if ($data === false) {
                 continue;
+            }
 
             $data = array_map('trim', $data);
 
             $channel = $data['Chaine_Nom'];
             if (strtotime($data['Date_Debut']) <= $timestamp &&
-                $timestamp <= strtotime($data['Date_Fin']))
+                $timestamp <= strtotime($data['Date_Fin'])) {
                 $infos[$channel] = $data;
+            }
         }
         return $infos;
     }
 }
-

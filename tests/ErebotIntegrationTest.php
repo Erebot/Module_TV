@@ -61,26 +61,26 @@ class TestTvRetriever
 }
 
 class ErebotTestModule_Tv
-extends Erebot_Module_TV
+extends \Erebot\Module\TV
 {
-    protected $_dateParser = array('ErebotTestModule_Tv', 'parseDate');
+    protected $dateParser = array('ErebotTestModule_Tv', 'parseDate');
 
     public function setTvRetriever($tv)
     {
-        $this->_tv = $tv;
+        $this->tv = $tv;
     }
 
     public function setCustomMappings($mappings)
     {
-        $this->_customMappings = $mappings;
+        $this->customMappings = $mappings;
     }
 
     public function setDefaultGroup($group)
     {
-        $this->_defaultGroup = $group;
+        $this->defaultGroup = $group;
     }
 
-    static public function parseDate($date)
+    public static function parseDate($date)
     {
         if ($date == 'now')
             return 502031100;
@@ -94,12 +94,12 @@ extends Erebot_Testenv_Module_TestCase
     public function _mockPrivateText($source, $text)
     {
         $event = $this->getMock(
-            'Erebot_Interface_Event_PrivateText',
+            '\\Erebot\\Interfaces\\Event\\PrivateText',
             array(), array(), '', FALSE, FALSE
         );
 
         $wrapper = $this->getMock(
-            'Erebot_Interface_TextWrapper',
+            '\\Erebot\\Interfaces\\TextWrapper',
             array(), array(), '', FALSE, FALSE
         );
 
@@ -129,13 +129,13 @@ extends Erebot_Testenv_Module_TestCase
         $this->_module = new ErebotTestModule_Tv(NULL);
         parent::setUp();
 
-        $this->_module->reload($this->_connection, 0);
+        $this->_module->reloadModule($this->_connection, 0);
         $this->_module->setTvRetriever(new TestTvRetriever());
     }
 
     public function tearDown()
     {
-        $this->_module->unload();
+        $this->_module->unloadModule();
         parent::tearDown();
     }
 
@@ -156,12 +156,10 @@ extends Erebot_Testenv_Module_TestCase
         $event = $this->_mockPrivateText('test', '!tv 23h42 foo');
         $this->_module->handleTv($this->_eventHandler, $event);
 
-        $expected =  'PRIVMSG test :TV programs for <u><var '.
-                    'value="array ( 0 => 502069320, 1 => 1, 2 => 2, )"/></u>: '.
-                    '<for from="array ( \'foo\' => \'foo (17:23 - 17:42)\', '.
-                    '\'bar\' => \'bar (17:23 - 17:42)\', )" key="channel" '.
-                    'item="timetable" separator=" - "><b><var name="channel"/>'.
-                    '</b>: <var name="timetable"/></for>';
+        $expected = "PRIVMSG test :TV programs for ".
+                    "\037November 28, 1985 11:42:00 PM\037: ".
+                    "\002foo\002: foo (17:23 - 17:42) - ".
+                    "\002bar\002: bar (17:23 - 17:42)";
         $this->assertEquals(1, count($this->_outputBuffer));
         $this->assertEquals($expected, $this->_outputBuffer[0]);
     }

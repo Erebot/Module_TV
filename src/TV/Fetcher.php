@@ -67,7 +67,8 @@ class Fetcher
         $response = \Requests::request(
             self::TARGET_URL,
             array(),
-            array('grille', 'telerama'),
+            array('grille' => 'telerama'),
+            \Requests::GET,
             array(
                 'follow_redirects'  => true,
                 'timeout'           => $this->timeout,

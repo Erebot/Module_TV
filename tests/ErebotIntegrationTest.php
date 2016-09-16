@@ -93,15 +93,8 @@ extends Erebot_Testenv_Module_TestCase
 {
     public function _mockPrivateText($source, $text)
     {
-        $event = $this->getMock(
-            '\\Erebot\\Interfaces\\Event\\PrivateText',
-            array(), array(), '', FALSE, FALSE
-        );
-
-        $wrapper = $this->getMock(
-            '\\Erebot\\Interfaces\\TextWrapper',
-            array(), array(), '', FALSE, FALSE
-        );
+        $event = $this->getMockBuilder('\\Erebot\\Interfaces\\Event\\PrivateText')->getMock();
+        $wrapper = $this->getMockBuilder('\\Erebot\\Interfaces\\TextWrapper')->getMock();
 
         $text = explode(' ', $text, 3);
         $wrapper
@@ -157,11 +150,10 @@ extends Erebot_Testenv_Module_TestCase
         $this->_module->handleTv($this->_eventHandler, $event);
 
         $expected = "PRIVMSG test :TV programs for ".
-                    "\037November 28, 1985 11:42:00 PM\037: ".
+                    "\037November 28, 1985 at 11:42:00 PM\037: ".
                     "\002foo\002: foo (17:23 - 17:42) - ".
                     "\002bar\002: bar (17:23 - 17:42)";
         $this->assertEquals(1, count($this->_outputBuffer));
         $this->assertEquals($expected, $this->_outputBuffer[0]);
     }
 }
-

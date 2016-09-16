@@ -149,10 +149,16 @@ extends Erebot_Testenv_Module_TestCase
         $event = $this->_mockPrivateText('test', '!tv 23h42 foo');
         $this->_module->handleTv($this->_eventHandler, $event);
 
-        // The format changed with ICU 50-rc / CLDR 22.
+        // HHVM does not seem to rely on ICU's formats at all for dates/times.
+        // Also, ICU's format changed somewhat starting with ICU 50-rc.
         // See http://bugs.icu-project.org/trac/changeset/32275/icu/trunk/source/data/locales/en.txt
-        // for more information.
-        if (version_compare(INTL_ICU_DATA_VERSION, '50', '>=')) {
+        // for the commit that introduced this format change.
+        if (defined('HHVM_VERSION')) {
+            $expected = "PRIVMSG test :TV programs for ".
+                        "\0371985 11 28 23:42:00\037: ".
+                        "\002foo\002: foo (17:23 - 17:42) - ".
+                        "\002bar\002: bar (17:23 - 17:42)";
+        } elseif (version_compare(INTL_ICU_DATA_VERSION, '50', '>=')) {
             $expected = "PRIVMSG test :TV programs for ".
                         "\037November 28, 1985 at 11:42:00 PM\037: ".
                         "\002foo\002: foo (17:23 - 17:42) - ".

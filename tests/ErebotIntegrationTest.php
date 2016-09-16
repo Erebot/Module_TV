@@ -149,10 +149,20 @@ extends Erebot_Testenv_Module_TestCase
         $event = $this->_mockPrivateText('test', '!tv 23h42 foo');
         $this->_module->handleTv($this->_eventHandler, $event);
 
-        $expected = "PRIVMSG test :TV programs for ".
-                    "\037November 28, 1985 at 11:42:00 PM\037: ".
-                    "\002foo\002: foo (17:23 - 17:42) - ".
-                    "\002bar\002: bar (17:23 - 17:42)";
+        // The format changed with ICU 50-rc / CLDR 22.
+        // See http://bugs.icu-project.org/trac/changeset/32275/icu/trunk/source/data/locales/en.txt
+        // for more information.
+        if (version_compare(INTL_ICU_DATA_VERSION, '50', '>=')) {
+            $expected = "PRIVMSG test :TV programs for ".
+                        "\037November 28, 1985 at 11:42:00 PM\037: ".
+                        "\002foo\002: foo (17:23 - 17:42) - ".
+                        "\002bar\002: bar (17:23 - 17:42)";
+        } else {
+            $expected = "PRIVMSG test :TV programs for ".
+                        "\037November 28, 1985 11:42:00 PM\037: ".
+                        "\002foo\002: foo (17:23 - 17:42) - ".
+                        "\002bar\002: bar (17:23 - 17:42)";
+        }
         $this->assertEquals(1, count($this->_outputBuffer));
         $this->assertEquals($expected, $this->_outputBuffer[0]);
     }

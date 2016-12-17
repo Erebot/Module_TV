@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Erebot_Module_TV dev-master\n"
+"Project-Id-Version: Erebot_Module_TV 1.0.x-dev\n"
 "Report-Msgid-Bugs-To: i18n@erebot.net\n"
-"POT-Creation-Date: 2013-08-15 14:41+0200\n"
+"POT-Creation-Date: 2016-12-17 22:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 #
-# File: src/Erebot/Module/TV.php, line: 201
+# File: src/TV.php, line: 191
 msgid ""
 "<b>Usage:</b> !<var name='trigger'/> [<u>time</u>] [<u>channels</u>]. Returns "
 "TV schedules for the given channels at the given time. [<u>time</u>] can be "
@@ -25,37 +25,37 @@ msgid ""
 "defined groups of channels."
 msgstr ""
 #
-# File: src/Erebot/Module/TV.php, line: 312
+# File: src/TV.php, line: 295
 msgid ""
 "An error occurred while retrieving the information (<var name=\"error\"/>)"
 msgstr ""
 #
-# File: src/Erebot/Module/TV.php, line: 116
+# File: src/TV.php, line: 111
 msgid "Could not register TV trigger"
 msgstr ""
 #
-# File: src/Erebot/Module/TV.php, line: 212
+# File: src/TV.php, line: 202
 msgid ""
 "If none is given, the default group (<b><var name='default'/></b>) is used. "
 "The following groups are available: <for from='groups' key='group' "
 "item='dummy'><b><var name='group'/></b></for>."
 msgstr ""
 #
-# File: src/Erebot/Module/TV.php, line: 294
+# File: src/TV.php, line: 278
 msgid "No channel given and no default."
 msgstr ""
 #
-# File: src/Erebot/Module/TV.php, line: 332
+# File: src/TV.php, line: 312
 msgid "No such channel(s)"
 msgstr ""
 #
-# File: src/Erebot/Module/TV.php, line: 188
+# File: src/TV.php, line: 177
 msgid ""
 "Provides the <b><var name=\"trigger\"/></b> command which retrieves "
 "information about TV schedules off the internet."
 msgstr ""
 #
-# File: src/Erebot/Module/TV.php, line: 337
+# File: src/TV.php, line: 317
 msgid ""
 "TV programs for <u><var name=\"date\"/></u>: <for from=\"programs\" key="
 "\"channel\" item=\"timetable\" separator=\" - \"><b><var name=\"channel\"/></"

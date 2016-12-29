@@ -1,0 +1,78 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2016, Erebot
+# This file is distributed under the same license as the Erebot_Module_TV package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Erebot_Module_TV 1.0.x-dev\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-30 00:11+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/Usage.rst:10
+msgid "Usage"
+msgstr ""
+
+#: ../src/Usage.rst:12
+msgid "This section assumes default values are used for all triggers. Please refer to :ref:`configuration options <configuration options>` for more information on how to customize triggers."
+msgstr ""
+
+#: ../src/Usage.rst:18
+msgid "Provided commands"
+msgstr ""
+
+#: ../src/Usage.rst:20
+msgid "This module provides the following commands:"
+msgstr ""
+
+#: ../src/Usage.rst:0
+msgid "Commands provided by |project|"
+msgstr ""
+
+#: ../src/Usage.rst:25
+msgid "Command"
+msgstr ""
+
+#: ../src/Usage.rst:25
+msgid "Description"
+msgstr ""
+
+#: ../src/Usage.rst:27
+msgid "``!tv``"
+msgstr ""
+
+#: ../src/Usage.rst:27
+msgid "Displays information about currently airing TV programs for the default channels group."
+msgstr ""
+
+#: ../src/Usage.rst:31
+msgid ":samp:`!tv {time}`"
+msgstr ""
+
+#: ../src/Usage.rst:31
+msgid "Displays information about TV programs for the default channels group at the given *time*. *time* may be given in either 12h or 24h format."
+msgstr ""
+
+#: ../src/Usage.rst:37
+msgid "|tv|"
+msgstr ""
+
+#: ../src/Usage.rst:37
+msgid "Displays TV schedules for the given *channels* at the given *time*. You may also use a :ref:`channel group <channel groups>` in place of *channels*. *time* may be given in either 12h or 24h format."
+msgstr ""
+
+#: ../src/Usage.rst:48
+msgid "A list of valid channel groups can be retrieved using ``!help tv``."
+msgstr ""
+
+#: ../src/Usage.rst:52
+msgid "Example"
+msgstr ""
+

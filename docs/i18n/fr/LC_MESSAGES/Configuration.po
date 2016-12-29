@@ -1,0 +1,104 @@
+# French translations for Erebot_Module_TV package.
+# Copyright (C) 2011-2016, Erebot
+# This file is distributed under the same license as the Erebot_Module_TV package.
+# Automatically generated, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Erebot_Module_TV 1.0.x-dev\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-30 00:11+0100\n"
+"PO-Revision-Date: 2016-12-30 00:11+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#
+msgid "Configuration"
+msgstr ""
+#
+msgid "Options"
+msgstr ""
+#
+msgid "This module provides several configuration options."
+msgstr ""
+#
+msgid "Options for |project|"
+msgstr ""
+#
+msgid "Name"
+msgstr ""
+#
+msgid "Type"
+msgstr ""
+#
+msgid "Default value"
+msgstr ""
+#
+msgid "Description"
+msgstr ""
+#
+msgid "fetcher_class"
+msgstr ""
+#
+msgid "string"
+msgstr ""
+#
+msgid "\"|fetcher|\""
+msgstr ""
+#
+msgid ""
+"The class to use to retrieve TV schedules. The default is fine unless you "
+"have specific needs for something else. This class should implement the |"
+"fetcherIface|_ interface."
+msgstr ""
+#
+msgid "|groups|"
+msgstr ""
+#
+msgid "n/a"
+msgstr ""
+#
+msgid ""
+"A list of comma-separated TV channel names, that form a common group. The "
+"\"*name*\" part of the parameter is used as the name of the group. This "
+"option may be used several times (with varying \"*name*\" parts) to create "
+"additional groups. This parameter is optional."
+msgstr ""
+#
+msgid "default_group"
+msgstr ""
+#
+msgid ""
+"If no TV channel has been given to the bot when requesting TV schedules, it "
+"will retrieve schedules for channels in this group instead. This parameter is "
+"optional."
+msgstr ""
+#
+msgid "trigger"
+msgstr ""
+#
+msgid "\"tv\""
+msgstr ""
+#
+msgid "The command to use to display TV schedules."
+msgstr ""
+#
+msgid ""
+"The trigger should only contain alphanumeric characters (in particular, do "
+"not add any prefix, like \"!\" to that value)."
+msgstr ""
+#
+msgid "Example"
+msgstr ""
+#
+msgid ""
+"In this example, we use a custom fetching class called ``My_TV_Fetcher`` and "
+"we define a group called \"``hertzien``\" which will contain the 7 basic "
+"french TV channels available using classical terrestrial TV technology. This "
+"will also be the default group if the bot is queried for TV schedules without "
+"any additional parameter."
+msgstr ""

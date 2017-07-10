@@ -155,7 +155,7 @@ extends Erebot_Testenv_Module_TestCase
         // for the commit that introduced this format change.
         if (defined('HHVM_VERSION')) {
             $expected = "PRIVMSG test :TV programs for ".
-                        "\0371985 11 28 23:42:00\037: ".
+                        "\0371985 M11 28 23:42:00\037: ".
                         "\002foo\002: foo (17:23 - 17:42) - ".
                         "\002bar\002: bar (17:23 - 17:42)";
         } elseif (version_compare(INTL_ICU_DATA_VERSION, '50', '>=')) {

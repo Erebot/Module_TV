@@ -18,7 +18,7 @@
         "source": "https://github.com/Erebot/Module_TV"
     },
     "require": {
-        "php": ">=5.3.0",
+        "php": ">=7.0",
         "rmccue/requests": "*",
         "erebot/triggerregistry-module": "*",
         "erebot/api": "^0.7.1",
